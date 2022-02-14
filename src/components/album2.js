@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useRef } from 'react';
 import moment from 'moment';
-import { Text, View, PermissionsAndroid, Platform, Modal, StyleSheet, ScrollView, Image, TouchableWithoutFeedback, FlatList, TouchableOpacity, TouchableNativeFeedback,Alert } from 'react-native';
+import { Text, View, PermissionsAndroid, Platform, Modal, StyleSheet, ScrollView, Image, TouchableWithoutFeedback, FlatList, TouchableOpacity, TouchableNativeFeedback, Alert } from 'react-native';
 import CameraRoll from "@react-native-community/cameraroll";
 import Upload from './Upload';
 // import { Checkbox, NativeBaseProvider } from "native-base"
@@ -21,6 +21,7 @@ const hasAndroidPermission = async () => {
 function album({ route }) {
     const { albumList } = route.params;
 
+    const flatListRef = useRef(null);
     const [test, settest] = useState(0);
     const [currentAlbum, setCurrentAlbum] = useState({ title: "Camera" });
     const [photoListState, setPhotoListState] = useState([]);
@@ -82,11 +83,11 @@ function album({ route }) {
         console.log(fileUrl);
         let fileName = fileUrl.split("/").slice(-1)[0]
         console.log(fileName)
-        let data = await Upload.upload(fileUrl,fileName);
+        let data = await Upload.upload(fileUrl, fileName);
         Alert.alert(
             "Alert Title",
             data
-          );
+        );
         console.log(data)
     };
 
@@ -127,7 +128,7 @@ function album({ route }) {
 
     function albumListNode() {//渲染相册组件
         return (albumState.map((item) => {
-            return <TouchableWithoutFeedback onPress={() => { setCurrentAlbum(item) }} key={item.title}>
+            return <TouchableWithoutFeedback onPress={() => { setCurrentAlbum(item);}} key={item.title}>
                 <View style={{ flex: 1, flexDirection: "row", marginVertical: 10, position: "relative" }}>
                     <Image
                         style={{
@@ -161,6 +162,7 @@ function album({ route }) {
 
 
     function getPhotoList() {
+        // console.log(currentAlbum)
         let options = {
             first: currentAlbum.count || 50,
             // first: 2,
@@ -171,6 +173,7 @@ function album({ route }) {
         }
         let dateIndexMapping = {};
         CameraRoll.getPhotos(options).then(function (data) {
+            //格式化相册数据
             let photosFormatByDate = data.edges.reduce(function (list, item) {
                 let photoDate = moment(item.node.timestamp * 1000).format("YYYY年MM月DD日")
                 if (dateIndexMapping[photoDate]) {
@@ -185,19 +188,22 @@ function album({ route }) {
                 }
                 return list
             }, [])
-            console.log(photosFormatByDate[0].data)
-            setPhotoListState(photosFormatByDate)
+            // console.log(photosFormatByDate[0].data)
+            setPhotoListState(photosFormatByDate)//保存图片列表信息到useState
+            flatListRef.current.scrollToOffset({offset:0,animated:false});
         })
     }
 
     const photoList = function () {
         const renderItem = ({ item }) => (
             <View>
-                <Text style={{ marginLeft: 25, fontSize: 12, paddingVertical: 10 }}>{item.title}</Text>
+                {/* 时间 */}
+                <Text style={{ marginLeft: 25, fontSize: 12,height:30,lineHeight:30 }}>{item.title}</Text>
                 <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
                     {item.data.map((photo, index) => {
                         return <TouchableOpacity key={index} onPress={() => { remakePhoto(photo) }} activeOpacity={0.8}>
                             <View style={{ marginBottom: 4, marginLeft: index % 4 == 0 ? 0 : 4, position: "relative" }}>
+                                {/* 图片 */}
                                 <Image
                                     style={{
                                         width: 95,
@@ -208,6 +214,7 @@ function album({ route }) {
                                         uri: photo.image?.uri,
                                     }}
                                 />
+                                {/* 选中的勾 */}
                                 {selectPhotoState[photo.image?.uri] && <Image
                                     style={{
                                         width: 20,
@@ -230,9 +237,14 @@ function album({ route }) {
             <FlatList
                 data={photoListState}
                 renderItem={renderItem}
-                getItemLayout={(data, index) => (
-                    { length: 95, offset: 95 * index, index }
-                )}
+                initialNumToRender={30}
+                ref={flatListRef}
+                // getItemLayout={(data, index) => {
+                //     // console.log(data[0])
+                //     let height = Math.ceil(data[index].data.length / 4) * 99 +31
+                //     console.log(height)
+                //     return { length: height, offset: height * index, index }
+                // }}
                 keyExtractor={(item) => {
                     return item.title
                 }}

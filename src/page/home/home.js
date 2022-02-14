@@ -49,9 +49,26 @@ function Home({ navigation }) {
         })
     }
     return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', position: "relative", backgroundColor: "white" }}>
-            <Text>Home!</Text>
-            <Button title='登录' onPress={() => { navigation.navigate("Login") }}></Button>
+        <View style={{ flex: 1, flexDirection: "row", justifyContent: 'space-around', alignItems: 'flex-start', position: "relative", backgroundColor: "white" }}>
+            <View style={{ width: '30%', justifyContent: "center", alignItems: "center" }}>
+                <Image
+                    style={{width:80,height:80}}
+                    source={require("../../assets/image/home/dir-icon.png")}
+                />
+                <Text style={{fontSize:18,marginTop:10}}>测试的名字</Text>
+                <Text style={{fontSize:13, color:"#E2E2E2",fontWeight:"700",marginTop:8}}>2022/01/07</Text>
+                <View style={{ backgroundColor: "#F6F5F8", width: 40, height: 20, borderRadius: 20,justifyContent: "center", alignItems: "center" }}>
+                    <Image
+                        resizeMode="contain"
+                        style={{width:20}}
+                        source={require("../../assets/image/home/more-point.png")}
+                    />
+                </View>
+            </View>
+            {/* <View style={{ flex: 1, height: 20, backgroundColor: "red" }}></View>
+            <View style={{ flex: 1, height: 20, backgroundColor: "blue" }}></View> */}
+            {/* <Text>Home!</Text>
+            <Button title='登录' onPress={() => { navigation.navigate("Login") }}></Button> */}
             {/* <Button title='go albunm' onPress={goAlbum}></Button> */}
             <TouchableWithoutFeedback onPress={goAlbum}>
                 <View style={{
